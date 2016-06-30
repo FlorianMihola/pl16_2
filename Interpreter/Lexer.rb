@@ -5,27 +5,27 @@ class Lexer
     #pos is an index into text    
     @pos = 0
     @text = text
-    @current_char = text[pos]
+    @currentChar = text[pos]
   end
   
   def error
     raise 'Invalid Character'
   end
   
-  # Advance pos pointer and set new current_char
+  # Advance pos pointer and set new currentChar
   def advance 
      
     @pos += 1
     if pos > text.length(text) - 1
-      @current_char = nil
+      @currentChar = nil
     else 
-      @current_char = @text[@pos]
+      @currentChar = @text[@pos]
     end
    
   end
   
   def skipWhitespaces
-    while @current_char != nil and @current_char.match(/\s/) != nil
+    while @currentChar != nil and @currentChar.match(/\s/) != nil
       advance
     end
   end
@@ -33,8 +33,8 @@ class Lexer
   #Returns a string consumed from the input
   def string
     result = ''
-    while @current_char != nil and @current_char.match(/[A-Za-z0-9_]/) != nil
-      result += @current_char
+    while @currentChar != nil and @currentChar.match(/[A-Za-z0-9_]/) != nil
+      result += @currentChar
       advance
     end
     return result
@@ -44,47 +44,47 @@ class Lexer
   # One token a time.
   def getNextToken
     
-    if @current_char.match(/\s/) != nil
+    if @currentChar.match(/\s/) != nil
           skipWhitespaces
     end
     
-    if @current_char.match(/[A-Za-z0-9_]/) != nil
+    if @currentChar.match(/[A-Za-z0-9_]/) != nil
       return Token(STRING, string)
     end
     
-    if @current_char == '{'
+    if @currentChar == '{'
       return Token(OPENING_BRACE,'{')
     end
     
-    if @current_char == '}'
+    if @currentChar == '}'
       return Token(CLOSING_BRACE,'}')
     end
     
-    if @current_char == '['
+    if @currentChar == '['
       return Token(OPENING_BRACKET,'[')
     end
     
-    if @current_char == ']'
+    if @currentChar == ']'
       return Token(CLOSING_BRACKET,']')
     end
     
-    if @current_char == ':'
+    if @currentChar == ':'
       return Token(COLON,':')
     end
     
-    if @current_char == '*'
+    if @currentChar == '*'
       return Token(ASTERIX,'*')
     end
     
-    if @current_char == '='
+    if @currentChar == '='
       return Token(EQUALS,'=')
     end
     
-    if @current_char == ';'
+    if @currentChar == ';'
       return Token(SEMICOLON,';')
     end
     
-    if @current_char == '^'
+    if @currentChar == '^'
       return Token(CIRCUMFLEX,'^')
     end
     
