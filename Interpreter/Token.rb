@@ -13,6 +13,8 @@ COLON, SEMICOLON, HASH, COMMA, DOT = 'STRING', 'PLUS',
 
 
 class Token
+  attr_accessor :type
+  attr_accessor :value
   
   def initialize(type, value)
     @type = type
