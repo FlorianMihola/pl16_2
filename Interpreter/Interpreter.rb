@@ -18,10 +18,15 @@ class Interpreter
     # otherwise raise an exception.
     
     if @currentToken.type == tokenType
+      #debug
+      puts 'Token: ' + @currentToken.toString + "\n"
+      
       @currentToken =  @lexer.getNextToken
     else
       error
     end
+    
+    
   end
   
   def checkForExpression?(tokenType)
@@ -31,7 +36,7 @@ class Interpreter
     #   -  { '*' } name(string literal) 
     #   -  '('
     
-    if [STRING, OPENING_BRACE, ASTERIX, OPENING_PARANTHESIS].include? tokenType
+    if [STRING, OPENING_BRACE, ASTERIX, OPENING_PARANTHESIS,NAME].include? tokenType
           return true
     end
     
@@ -52,14 +57,106 @@ class Interpreter
     
     eat(OPENING_BRACE)
     # There might be multiple commands in a block
-    while [OPENING_BRACKET,CIRCUMFLEX,ASTERIX,STRING].include? @currentToken.type or 
+    while [OPENING_BRACKET, CIRCUMFLEX, ASTERIX,NAME].include? @currentToken.type or 
       checkForExpression? @currentToken.type 
-      # Note that '+=' needs to be replaced with a valid way to handle the result of mulitple commands 
-      result += command
+      command
     end
     eat(CLOSING_BRACE)
-    
-    return result
+   
   end
   
+  def command
+    #################################################################
+    #
+    #  command    ::=  '[' guard ':' { command } ']'                  #(1)
+    #                 |  [ { '*' } name '=' ] expression ';'          #(2)
+    #                 |  '^' expression ';'                           #(3)  
+    #
+    #########################################################
+    
+    #(1)
+    if @currentToken.type == OPENING_BRACKET
+  
+      eat(OPENING_BRACKET)
+      guard
+      eat(COLON)
+      # There might be multiple commands in a block
+      while [OPENING_BRACKET, CIRCUMFLEX, ASTERIX,NAME].include? @currentToken.type or 
+           checkForExpression? @currentToken.type 
+           command
+      end
+      eat(CLOSING_BRACKET)
+    
+    #(3)
+    elsif @currentToken.type == CIRCUMFLEX
+      eat(CIRCUMFLEX)
+      expression
+      eat(SEMICOLON)
+    
+    #(2)
+    elsif @currentToken.type == ASTERIX or @currentToken.type == NAME
+      while @currentToken.type == ASTERIX
+        eat(ASTERIX)
+      end
+      if @lexer.peekForAssignment?
+        eat(NAME)
+        eat(EQUALS)
+      end
+      expression
+      eat(SEMICOLON)
+    end
+    
+  end
+  
+  def guard
+    #
+    #       guard      ::=  expression ( '=' | '#' ) expression [ ',' guard ]
+    #
+    
+    expression
+    if @currentToken.type == EQUALS
+      eat(EQUALS)
+    else
+      eat(HASH)
+    end
+    expression
+    if @currentToken.type == COMMA
+      eat(COMMA)
+      guard
+    end
+  end
+  
+  def expression
+    #
+    # expression ::= ( string_literal | block | { '*' } name | '(' expression ')' )
+    #                 { '.' name } [ '+' expression ]
+    #
+  
+    if @currentToken.type == STRING
+      eat(STRING)
+    elsif @currentToken.type == OPENING_BRACE
+      block
+    elsif @currentToken.type == ASTERIX or @currentToken.type == NAME
+      while @currentToken.type == ASTERIX
+         eat(ASTERIX)
+      end
+      eat(NAME)
+    elsif @currentToken.type == OPENING_PARANTHESIS
+      eat(OPENING_PARANTHESIS)
+      expression
+      eat(CLOSING_PARANTHESIS)
+    else
+       error
+    end
+    
+    while @currentToken.type == DOT
+      eat(DOT)
+      eat(NAME)
+    end
+    
+    if @currentToken.type == PLUS
+      eat(PLUS)
+      expression
+    end
+  end
 end
