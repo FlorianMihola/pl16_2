@@ -33,7 +33,7 @@ class Interpreter
     # An expression can start with 
     #   -  string literal
     #   -  block ('{')
-    #   -  { '*' } name(string literal) 
+    #   -  { '*' } name 
     #   -  '('
     
     if [STRING, OPENING_BRACE, ASTERIX, OPENING_PARANTHESIS,NAME].include? tokenType
@@ -80,7 +80,7 @@ class Interpreter
       eat(OPENING_BRACKET)
       guard
       eat(COLON)
-      # There might be multiple commands in a block
+      # There might be multiple commands 
       while [OPENING_BRACKET, CIRCUMFLEX, ASTERIX,NAME].include? @currentToken.type or 
            checkForExpression? @currentToken.type 
            command

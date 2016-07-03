@@ -43,9 +43,8 @@ class Lexer
   
   def peekForAssignment?
     # We look for an assignment
-    # It has to be of the form: "name '='"
-    # name = /[A-Za-z0-9_]/
-    
+    # It has to be of the form: "{\s}="
+
     if @text[@pos..-1] =~ /\A\s*=/ 
       return true
     end
@@ -53,7 +52,7 @@ class Lexer
   end
   
   def string
-    # returns a string literal
+    # returns a string 
     result = "\""
     advance
     while  @currentChar != nil and @currentChar != "\""
@@ -93,7 +92,7 @@ class Lexer
     if @currentChar  == '%'
        comment
        if @currentChar.match(/\s/) != nil
-                skipWhitespaces
+          skipWhitespaces
        end
     end 
     
