@@ -85,6 +85,10 @@ class Lexer
   # One token a time.
   def getNextToken
     
+    #Check if the end has been reached
+    if @currentChar == nil
+      return
+    end
     if @currentChar.match(/\s/) != nil
           skipWhitespaces
     end

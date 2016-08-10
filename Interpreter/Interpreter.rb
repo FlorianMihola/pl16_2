@@ -1,5 +1,8 @@
 require 'Lexer'
-
+require 'Nodes/Expression'
+require 'Nodes/Command/AssignmentCommand'
+require 'Nodes/Block'
+require 'Nodes/Guard'
 class Interpreter 
   
   def initialize(lexer)
@@ -56,13 +59,17 @@ class Interpreter
     #########################################################
     
     eat(OPENING_BRACE)
+    createdBlock = Block.new()
+    values ||= Array.new
     # There might be multiple commands in a block
     while [OPENING_BRACKET, CIRCUMFLEX, ASTERIX,NAME].include? @currentToken.type or 
       checkForExpression? @currentToken.type 
-      command
+      constructedCommand = command
+      values.push(constructedCommand)
     end
+    createdBlock.commands=(values)
     eat(CLOSING_BRACE)
-   
+    return createdBlock
   end
   
   def command
@@ -78,32 +85,44 @@ class Interpreter
     if @currentToken.type == OPENING_BRACKET
   
       eat(OPENING_BRACKET)
-      guard
+      createdGuard = guard
       eat(COLON)
       # There might be multiple commands 
+      createdCommand = nil
       while [OPENING_BRACKET, CIRCUMFLEX, ASTERIX,NAME].include? @currentToken.type or 
            checkForExpression? @currentToken.type 
-           command
+           createdCommand = command
       end
       eat(CLOSING_BRACKET)
-    
+      guardedCommand = GuardedCommand.new(createdGuard,createdCommand)
+      return guardedCommand
+          
     #(3)
     elsif @currentToken.type == CIRCUMFLEX
       eat(CIRCUMFLEX)
-      expression
+      createdExpression = expression
       eat(SEMICOLON)
-    
-    #(2)
-    elsif @currentToken.type == ASTERIX or @currentToken.type == NAME
+      returnCommand = ReturnCommand.new(createdExpression)
+      return returnCommand
+    #(2) just else because also only simple expression is eligible here, simplifies a notation
+    else
+      
+      level = 0
       while @currentToken.type == ASTERIX
         eat(ASTERIX)
+        level += 1
       end
+      
+      createdName = nil
       if @lexer.peekForAssignment?
+        createdName = Name.new(level, (@currentToken.value))
         eat(NAME)
         eat(EQUALS)
       end
-      expression
+      retValue = expression
+      assignmentCommand = AssignmentCommand.new(createdName, retValue)
       eat(SEMICOLON)
+      return assignmentCommand;
     end
     
   end
@@ -113,17 +132,22 @@ class Interpreter
     #       guard      ::=  expression ( '=' | '#' ) expression [ ',' guard ]
     #
     
-    expression
+    expressionLeft = expression
+    equals = false
     if @currentToken.type == EQUALS
       eat(EQUALS)
+      equals = true
     else
       eat(HASH)
     end
-    expression
+    expressionRight = expression
+    nextGuard = nil
     if @currentToken.type == COMMA
       eat(COMMA)
-      guard
+      nextGuard = guard
     end
+    guard = Guard.new(expressionLeft, equals, expressionRight, nextGuard)
+    return guard
   end
   
   def expression
@@ -132,31 +156,43 @@ class Interpreter
     #                 { '.' name } [ '+' expression ]
     #
   
+    left = nil
     if @currentToken.type == STRING
+      left = StringExpression.new(@currentToken.value)
       eat(STRING)
     elsif @currentToken.type == OPENING_BRACE
-      block
+      left = block
     elsif @currentToken.type == ASTERIX or @currentToken.type == NAME
+      level = 0
       while @currentToken.type == ASTERIX
          eat(ASTERIX)
+         level += 1
       end
+      left = Name.new(level, @currentToken.value)
       eat(NAME)
     elsif @currentToken.type == OPENING_PARANTHESIS
       eat(OPENING_PARANTHESIS)
-      expression
+      left = expression
       eat(CLOSING_PARANTHESIS)
     else
        error
     end
     
+    
+    propertyReferences = Array.new
     while @currentToken.type == DOT
       eat(DOT)
+      propertyReferences.push(@currentToken.value)
       eat(NAME)
     end
+    propertyReference = PropertyReference.new(propertyReferences)
     
+    right = nil
     if @currentToken.type == PLUS
       eat(PLUS)
-      expression
+      right = expression
     end
+    obj = Expression.new(left, propertyReference, right)
+    return obj
   end
 end

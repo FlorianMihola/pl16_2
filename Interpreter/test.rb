@@ -1,7 +1,8 @@
 require 'Lexer'
 require 'Interpreter'
 
-contents = File.read('test')
+contents = File.read('test3')
 lexer = Lexer.new(contents)
 interpreter = Interpreter.new(lexer)
-interpreter.block()
+obj = interpreter.block()
+print "asdf"
