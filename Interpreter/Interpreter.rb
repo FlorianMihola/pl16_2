@@ -88,13 +88,13 @@ class Interpreter
       createdGuard = guard
       eat(COLON)
       # There might be multiple commands 
-      createdCommand = nil
+      createdCommands = Array.new
       while [OPENING_BRACKET, CIRCUMFLEX, ASTERIX,NAME].include? @currentToken.type or 
            checkForExpression? @currentToken.type 
-           createdCommand = command
+           createdCommands.push(command)
       end
       eat(CLOSING_BRACKET)
-      guardedCommand = GuardedCommand.new(createdGuard,createdCommand)
+      guardedCommand = GuardedCommand.new(createdGuard,createdCommands)
       return guardedCommand
           
     #(3)

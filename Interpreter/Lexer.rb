@@ -169,7 +169,14 @@ class Lexer
        advance
        return Token.new(DOT,'.')
     end
-    
+    if @currentChar == '#'
+       advance
+       return Token.new(HASH,'#')
+    end
+    if @currentChar == ','
+       advance
+       return Token.new(COMMA,',')
+    end
     error
     
     return Token.new(EOF,'EOF')   

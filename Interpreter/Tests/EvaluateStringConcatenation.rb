@@ -12,7 +12,8 @@ class EvaluateStringConcatenation < Test::Unit::TestCase
     createdBlock = interpreter.block()
     assert_equal(1, createdBlock.commands.size)
     propertyList = PropertyList.new
-    createdBlock.visit(propertyList)
+    propertyList = createdBlock.visit(propertyList)
+    propertyList.printList
     assert_equal(1, propertyList.properties.size)
   end
 end

@@ -12,7 +12,8 @@ class PropertyListEvaluationTest < Test::Unit::TestCase
     createdBlock = interpreter.block()
     assert_equal(2, createdBlock.commands.size)
     propertyList = PropertyList.new
-    createdBlock.visit(propertyList)
+    propertyList = createdBlock.visit(propertyList)
+    propertyList.printList
     assert_equal(2, propertyList.properties.size)
   end
 end

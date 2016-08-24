@@ -4,7 +4,7 @@ require "PropertyList/PropertyList"
 class Block
   attr_accessor :commands
   def initialize
-    commands ||= Array.new
+    @commands ||= Array.new
   end
   
   def visit(parent)

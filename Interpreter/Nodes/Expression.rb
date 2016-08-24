@@ -17,14 +17,40 @@ class Expression
   #Evaluates an expression
   #TODO Consider a context! Each visits need a context because of e.g. propert reference .asdf.asdf.asdf ...
   def visit(propertyList)
+    
+    #Check if left is a Name
+    if @left.is_a? Name
+      #Solve reference
+      currentPropertyList = propertyList
+      i = 0
+      while i < @left.level do
+         currentPropertyList = currentPropertyList.parent
+         i+=1
+      end
+      property = currentPropertyList.getItemByStringName(@left.name)
+      if property == nil
+        error
+      end
+      @propertyReferences.referencedProperties.each{|p|
+          if property.type == Types::STRING
+            error
+          end
+          property = property.value.getItemByStringName(p)
+          if property == nil
+            error
+          end
+        }
+      return property.value
+    end
+    
     #Only left part of the assignment is present
-    if (right == nil)
-      evaluatedLeftExpression = left.visit(propertyList)
+    if (@right == nil)
+      evaluatedLeftExpression = @left.visit(propertyList)
       return evaluatedLeftExpression
       #TODO Handle the property reference somehow for the .syscall here
     end
-    evaluatedLeft = left.visit(propertyList)
-    evaluatedRight = right.visit(propertyList)
+    evaluatedLeft = @left.visit(propertyList)
+    evaluatedRight = @right.visit(propertyList)
     evaluatedLeft.mergeWith(evaluatedRight)
     return evaluatedLeft
     

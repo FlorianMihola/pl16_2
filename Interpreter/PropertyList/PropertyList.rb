@@ -15,8 +15,23 @@ class PropertyList
   
   def addPropertyList(name, propertyList)
     propertyList.parent = self
-    singleItem = PropertyListSingleItem.new(name, propertyList, Types::BLOCK)
-    @properties.push(singleItem)
+    currentPropertyList = propertyList
+    #Find property - go amount of * up
+    i = 0
+    while i < name.level do
+      currentPropertyList = currentPropertyList.parent
+      i+=1
+    end
+    #Find property - look for property
+    #TODO distinguish between BLOCK and STRING ???
+    property = currentPropertyList.parent.properties.find { |x| x.name.name == name.name}
+    if property == nil
+      singleItem = PropertyListSingleItem.new(name, propertyList, Types::BLOCK)
+      currentPropertyList.parent.properties.push(singleItem)
+    else  
+      property.value = propertyList
+      property.type = Types::BLOCK
+    end
   end
   
   def mergeWith(propertyList)
@@ -25,7 +40,10 @@ class PropertyList
       reflection = propertyList.getItem(x.name)
       if reflection != nil
         if x.type == Types::STRING && reflection.type == Types::STRING
-          concatString = PropertyListSingleItem.new(x.name, x.value + reflection.value, Types::STRING)
+          newValue = x.value + reflection.value
+          newValue.gsub!(/"/,'')
+          newValue = '"' + newValue + '"'
+          concatString = PropertyListSingleItem.new(x.name, newValue , Types::STRING)
           mergedList.push(concatString)
         
         else 
@@ -44,8 +62,45 @@ class PropertyList
     @properties = mergedList
   end
   
+  def replace!(propertyList)
+    @properties = propertyList.properties
+    @parent = propertyList.parent
+  end
+  
   def getItem(name)
     return @properties.detect { |x| x.name == name}
+  end
+  
+  def getItemByStringName(name)
+    return @properties.find { |x| 
+      if x.name.is_a? String 
+        x.name == name  
+      else
+        x.name.name == name
+      end
+    }
+  end
+  
+  def printList(depth = 0)
+   @properties.each{ |x|
+     i = 0
+     while i < depth
+       i+=1
+       print '  '  
+     end
+     if x.type == Types::STRING
+       puts 'Property: ' + x.name + ' = ' + x.value  
+     else
+       puts 'Property: ' + x.name.name + ' = {' 
+       x.value.printList(depth+1)
+       i = 0
+        while i < depth
+          i+=1
+          print '  '  
+        end
+       puts '}'
+     end
+   }
   end
 end
 

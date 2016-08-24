@@ -13,4 +13,29 @@ class Guard
     @expressionRight = expressionRight
     @nextGuard = nextGuard
   end
+  
+  #Checks the guard and returns true or false as result
+  def guard?(propertyList)
+    evaluatedLeftPropertyList = @expressionLeft.visit(propertyList)
+    evaluatedRightPropertyList = @expressionRight.visit(propertyList)
+    if evaluatedLeftPropertyList.getItemByStringName("value").value ==
+      evaluatedRightPropertyList.getItemByStringName("value").value
+      if @equals
+        if @nextGuard != nil
+          return @nextGuard.guard?(propertyList)
+        end
+      else
+        return false
+      end
+    else
+      if @equals
+        return false 
+      else
+        if @nextGuard != nil
+          return @nextGuard.guard?(propertyList)
+        end
+      end
+    end
+    return true
+  end
 end
