@@ -43,12 +43,12 @@ class Lexer
   
   def peekForAssignment?
     # We look for an assignment
-    # It has to be of the form: "{\s}="
+    # It has to be of the form: "{*}Name{\s}="
 
-    if @text[@pos..-1] =~ /\A\s*=/ 
+    if @text[@pos..-1] =~ /\A\**[A-Za-z0-9_]*\s*=/ 
       return true
     end
-    return false
+      return false
   end
   
   def string

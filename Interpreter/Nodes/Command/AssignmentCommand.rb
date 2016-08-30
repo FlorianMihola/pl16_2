@@ -11,15 +11,26 @@ class AssignmentCommand
     @expression = expression
   end
   def visit(propertyList)
-    #TODO
     expressionEvaluatedPropertyList = expression.visit(propertyList)
     
-    #TODO Handle nested name reference (*)
-    #check if there is actually an assignment
     if name != nil
-      propertyList.addPropertyList(name, expressionEvaluatedPropertyList)
-    end  
+      if expressionEvaluatedPropertyList.is_a? Block
+        propertyList.addProperty(name,expressionEvaluatedPropertyList)
+      else
+        propertyList.addPropertyList(name, expressionEvaluatedPropertyList)
+      end  
+    end
     return nil
+  end
+  
+  def printList(depth)
+    i = 0
+    while i < depth
+       i+=1
+       print '  '  
+    end
+    print @name.name + ' = '
+    @expression.printList(depth)  
   end
 end
 
@@ -38,8 +49,16 @@ class GuardedCommand
       if @guard.guard?(propertyList)
         @commands.each{ |c| c.visit(propertyList)}
       end
-      return nil
   end
+  
+  def printList(depth)
+      i = 0
+      while i < depth
+         i+=1
+         print '  '  
+      end
+      print @guard.printList(depth) + ' : ' + @commands.printList(depth)
+    end
 end
 
 #'^' expression ';'                           #(3)  
@@ -54,5 +73,15 @@ class ReturnCommand
     expressionEvaluatedPropertyList = expression.visit(propertyList)
     expressionEvaluatedPropertyList.parent = propertyList.parent
     propertyList.replace!(expressionEvaluatedPropertyList)
+    return "ReturnCommand"
+  end
+  
+  def printList(depth)
+        i = 0
+        while i < depth
+           i+=1
+           print '  '  
+        end
+        print '^ ' + @expression.printList(depth)
   end
 end

@@ -13,6 +13,25 @@ class PropertyList
     @properties.push(singleItem)
   end
   
+  def addProperty(name, value)
+      currentPropertyList = self
+      #Find property - go amount of * up
+      i = 0
+      while i < name.level do
+        currentPropertyList = currentPropertyList.parent
+        i+=1
+      end
+      #Find property - look for property
+      property = currentPropertyList.properties.find { |x| x.name.name == name.name}
+      if property == nil
+        singleItem = PropertyListSingleItem.new(name, value, Types::BLOCK)
+        currentPropertyList.properties.push(singleItem)
+      else  
+        property.value = value
+        property.type = Types::BLOCK
+      end
+    end
+  
   def addPropertyList(name, propertyList)
     propertyList.parent = self
     currentPropertyList = propertyList
@@ -23,7 +42,6 @@ class PropertyList
       i+=1
     end
     #Find property - look for property
-    #TODO distinguish between BLOCK and STRING ???
     property = currentPropertyList.parent.properties.find { |x| x.name.name == name.name}
     if property == nil
       singleItem = PropertyListSingleItem.new(name, propertyList, Types::BLOCK)
@@ -37,7 +55,7 @@ class PropertyList
   def mergeWith(propertyList)
     mergedList ||= Array.new 
     @properties.each{ |x|
-      reflection = propertyList.getItem(x.name)
+      reflection = propertyList.getItem(x.name.name)
       if reflection != nil
         if x.type == Types::STRING && reflection.type == Types::STRING
           newValue = x.value + reflection.value
@@ -68,10 +86,6 @@ class PropertyList
   end
   
   def getItem(name)
-    return @properties.detect { |x| x.name == name}
-  end
-  
-  def getItemByStringName(name)
     return @properties.find { |x| 
       if x.name.is_a? String 
         x.name == name  
@@ -91,7 +105,7 @@ class PropertyList
      if x.type == Types::STRING
        puts 'Property: ' + x.name + ' = ' + x.value  
      else
-       puts 'Property: ' + x.name.name + ' = {' 
+       puts 'Property: ' + x.name.name + ' = {'
        x.value.printList(depth+1)
        i = 0
         while i < depth

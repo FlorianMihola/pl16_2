@@ -106,15 +106,14 @@ class Interpreter
       return returnCommand
     #(2) just else because also only simple expression is eligible here, simplifies a notation
     else
-      
-      level = 0
-      while @currentToken.type == ASTERIX
-        eat(ASTERIX)
-        level += 1
-      end
-      
+          
       createdName = nil
       if @lexer.peekForAssignment?
+        level = 0
+        while @currentToken.type == ASTERIX
+           eat(ASTERIX)
+           level += 1
+        end
         createdName = Name.new(level, (@currentToken.value))
         eat(NAME)
         eat(EQUALS)
@@ -150,7 +149,7 @@ class Interpreter
     return guard
   end
   
-  def expression
+  def expression 
     #
     # expression ::= ( string_literal | block | { '*' } name | '(' expression ')' )
     #                 { '.' name } [ '+' expression ]

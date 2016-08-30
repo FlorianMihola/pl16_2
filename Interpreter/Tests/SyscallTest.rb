@@ -4,7 +4,7 @@ require 'Interpreter'
 require "PropertyList/PropertyList"
 
 class SyscallTest < Test::Unit::TestCase
-  def test_returnCommand
+  def test_syscall
       contents = File.read('test12')
       lexer = Lexer.new(contents)
       interpreter = Interpreter.new(lexer)

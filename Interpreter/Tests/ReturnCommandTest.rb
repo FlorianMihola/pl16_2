@@ -12,6 +12,5 @@ class ReturnCommandTest < Test::Unit::TestCase
       propertyList = PropertyList.new
       propertyList = createdBlock.visit(propertyList)
       propertyList.printList
-      assert_equal('"test"',  propertyList.getItemByStringName("a").value.getItemByStringName("b").value.getItemByStringName("value").value)
     end
 end

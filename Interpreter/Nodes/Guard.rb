@@ -18,8 +18,8 @@ class Guard
   def guard?(propertyList)
     evaluatedLeftPropertyList = @expressionLeft.visit(propertyList)
     evaluatedRightPropertyList = @expressionRight.visit(propertyList)
-    if evaluatedLeftPropertyList.getItemByStringName("value").value ==
-      evaluatedRightPropertyList.getItemByStringName("value").value
+    if evaluatedLeftPropertyList.getItem($valueName).value ==
+      evaluatedRightPropertyList.getItem($valueName).value
       if @equals
         if @nextGuard != nil
           return @nextGuard.guard?(propertyList)
@@ -37,5 +37,24 @@ class Guard
       end
     end
     return true
+  end
+  
+  def printList(depth)
+    i = 0
+    while i < depth
+       i+=1
+       print '  '  
+    end
+    if @equals
+      sign = " = "
+    else
+      sign = " # "
+    end
+    if @nextGuard == nil
+      print @expressionLeft.printList(depth) + sign + @expressionRight.printList(depth)
+    else
+      print @expressionLeft.printList(depth) + sign + @expressionRight.printList(depth) + @nextGuard.printList(depth)
+    end
+    
   end
 end
