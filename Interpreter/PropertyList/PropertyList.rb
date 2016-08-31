@@ -6,6 +6,12 @@ class PropertyList
   def initialize
     @properties ||= Array.new
     @parent = nil
+    addSyscall
+  end
+  
+  def addSyscall
+    singleItem = PropertyListSingleItem.new(Name.new(0,"syscall"), Syscall.new, Types::BLOCK)
+    @properties.push(singleItem)
   end
   
   def addItem(name, value)
@@ -55,7 +61,11 @@ class PropertyList
   def mergeWith(propertyList)
     mergedList ||= Array.new 
     @properties.each{ |x|
-      reflection = propertyList.getItem(x.name.name)
+      if x.type == Types::STRING
+        reflection = propertyList.getItem(x.name)
+      else
+        reflection = propertyList.getItem(x.name.name)
+      end
       if reflection != nil
         if x.type == Types::STRING && reflection.type == Types::STRING
           newValue = x.value + reflection.value
@@ -128,6 +138,36 @@ class PropertyListSingleItem
     @name = name
     @value = value
     @type = type
+  end
+end
+
+class Syscall
+  
+  def visit(propertyList)
+    #get StringPropertyList
+    item = propertyList.getItem($valueName)
+    if item != nil
+      #string = 'ruby ./'+item.value
+      string = item.value
+      string.gsub!(/\"/,'')
+      code = system(string)
+      if code == false
+        se = StringExpression.new('"0"')
+        code = PropertyList.new()
+        code = se.visit(code)
+      end
+      if code == true
+        se = StringExpression.new('"1"')
+        code = PropertyList.new()
+        code = se.visit(code)
+      end
+      return code
+    else
+      return StringExpression.new("\"\"")
+    end
+  end
+  
+  def printList(depth)
   end
 end
 

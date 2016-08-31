@@ -16,22 +16,34 @@ class Expression
     @reversed = false
   end
   
-  def visit(propertyList,lastExpression = nil)
-      # Calculation should happen in this order A + B + C = (A+B) + C
-      # Therefore reverse expressions (Currently: A + B + C = A + (B+C) )
-      if @reversed == false
-       if @right != nil
-         tmp = @right
-         @right = @left
-         @left = lastExpression
-         @reversed = true
-         return tmp.visit(propertyList,self)       
+  def reverse!(lastExpression = nil)
+    # Calculation should happen in this order A + B + C = (A+B) + C
+    # Therefore reverse expressions (Currently: A + B + C = A + (B+C) )
+    if @reversed == false
+     if @right != nil
+       tmp = @right
+       if @left.is_a? Expression
+         @right = @left.reverse!
        else
-          @reversed = true
           @right = @left
-          @left = lastExpression
        end
-      end
+       @left = lastExpression
+       @reversed = true
+       return tmp.reverse!(self)       
+     else
+        @reversed = true
+        if @left.is_a? Expression
+            @right = @left.reverse!
+        else
+            @right = @left
+         end
+        @left = lastExpression
+        return self
+     end
+    end
+  end
+  
+  def visit(propertyList)
     #Check if @right is a Name
      if @right.is_a? Name
        noProperty = false
@@ -44,7 +56,7 @@ class Expression
        end
        property = currentPropertyList.getItem(@right.name)
        if property == nil
-         evaluatedRight = StringExpression.new("")
+         evaluatedRight = StringExpression.new("\"\"")
          noProperty = true
        end
        if noProperty == false
@@ -54,7 +66,7 @@ class Expression
             end
             property = property.value.getItem(p)
             if property == nil
-              evaluatedRight = StringExpression.new("")
+              evaluatedRight = StringExpression.new("\"\"")
               noProperty = true
               break
             end
@@ -72,7 +84,8 @@ class Expression
        if evaluatedRight.is_a? Block or evaluatedRight.is_a? PropertyList
           return evaluatedRight
        else
-          return evaluatedRight.visit(propertyList)
+         evaluatedRight = evaluatedRight.visit(propertyList)       
+         return resolveReference(evaluatedRight)
        end
        #TODO Handle the property reference somehow for the .syscall here
      end
@@ -80,9 +93,46 @@ class Expression
      if evaluatedLeft.is_a? Block
        evaluatedLeft = evaluatedLeft.visit(propertyList)
      end
-     evaluatedRight = evaluatedRight.visit(propertyList)    
+     if evaluatedRight.is_a? Block
+        evaluatedRight = evaluatedRight.visit(propertyList,evaluatedLeft)   
+     else
+       if !evaluatedRight.is_a? PropertyList
+         evaluatedRight = evaluatedRight.visit(propertyList)
+       end      
+     end
+     if evaluatedRight.is_a? Block
+       evaluatedRight = evaluatedRight.visit(propertyList,evaluatedLeft)
+     end 
+     evaluatedRight = resolveReference(evaluatedRight)
      evaluatedLeft.mergeWith(evaluatedRight)
      return evaluatedLeft
+  end
+  
+  def resolveReference(evaluatedRight)
+    if !@right.is_a? Name
+       property = nil
+       #get the right property of the property list
+       @propertyReferences.referencedProperties.each { |p|
+         if property == nil
+            property = evaluatedRight.getItem(p)
+         else
+            property = property.value.getItem(p)
+         end        
+         if property == nil
+           evaluatedRight = StringExpression.new("\"\"")
+           break
+         end
+       }
+       if property != nil
+         if !property.is_a? PropertyList
+             #handle built in properties
+             evaluatedRight = property.value.visit(evaluatedRight)
+         else
+            evaluatedRight = property.value
+         end
+       end
+     end
+     return evaluatedRight
   end
   
   def printList(depth)

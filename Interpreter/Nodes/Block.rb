@@ -7,8 +7,11 @@ class Block
     @commands ||= Array.new
   end
   
-  def visit(parent)
+  def visit(parent,arguments = nil)
     propertyList = PropertyList.new()
+    if arguments != nil
+      propertyList.mergeWith(arguments)
+    end
     if (parent != nil)
       propertyList.parent = parent
     end

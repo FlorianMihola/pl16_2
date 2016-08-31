@@ -8,10 +8,10 @@ class AssignmentCommand
   
   def initialize(name, expression)
     @name = name
-    @expression = expression
+    @expression = expression.reverse!
   end
   def visit(propertyList)
-    expressionEvaluatedPropertyList = expression.visit(propertyList)
+    expressionEvaluatedPropertyList = @expression.visit(propertyList)
     
     if name != nil
       if expressionEvaluatedPropertyList.is_a? Block
@@ -47,7 +47,14 @@ class GuardedCommand
   def visit(propertyList)
       #check if guard is satisfied
       if @guard.guard?(propertyList)
-        @commands.each{ |c| c.visit(propertyList)}
+        message = nil
+        @commands.each{ |x| 
+              message = x.visit(propertyList)
+              if message == "ReturnCommand"
+                break;
+              end
+            }
+        return message;
       end
   end
   
@@ -57,7 +64,9 @@ class GuardedCommand
          i+=1
          print '  '  
       end
-      print @guard.printList(depth) + ' : ' + @commands.printList(depth)
+      @guard.printList(depth) 
+      print ' : '
+      @commands.each{|c| c.printList(depth)}
     end
 end
 
@@ -66,7 +75,7 @@ class ReturnCommand
   attr_accessor :expression
   
   def initialize(expression)
-    @expression = expression
+    @expression = expression.reverse!
   end
   
   def visit(propertyList)
@@ -82,6 +91,7 @@ class ReturnCommand
            i+=1
            print '  '  
         end
-        print '^ ' + @expression.printList(depth)
+        print '^ ' 
+        @expression.printList(depth)
   end
 end

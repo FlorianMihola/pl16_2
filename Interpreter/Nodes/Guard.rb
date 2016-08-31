@@ -8,9 +8,9 @@ class Guard
   attr_accessor :nextGuard
   
   def initialize(expressionLeft, equals, expressionRight, nextGuard)
-    @expressionLeft = expressionLeft
+    @expressionLeft = expressionLeft.reverse!
     @equals = equals
-    @expressionRight = expressionRight
+    @expressionRight = expressionRight.reverse!
     @nextGuard = nextGuard
   end
   
@@ -51,9 +51,14 @@ class Guard
       sign = " # "
     end
     if @nextGuard == nil
-      print @expressionLeft.printList(depth) + sign + @expressionRight.printList(depth)
+      @expressionLeft.printList(depth)
+      print " " + sign + " "
+      @expressionRight.printList(depth)
     else
-      print @expressionLeft.printList(depth) + sign + @expressionRight.printList(depth) + @nextGuard.printList(depth)
+      @expressionLeft.printList(depth) 
+      print " " + sign + " "
+      @expressionRight.printList(depth)
+      @nextGuard.printList(depth)
     end
     
   end
