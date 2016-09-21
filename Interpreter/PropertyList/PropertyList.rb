@@ -7,11 +7,16 @@ class PropertyList
     @properties ||= Array.new
     @parent = nil
     addSyscall
+    addSyscall2
   end
   
   def addSyscall
     singleItem = PropertyListSingleItem.new(Name.new(0,"syscall"), Syscall.new, Types::BLOCK)
     @properties.push(singleItem)
+  end
+  def addSyscall2
+      singleItem = PropertyListSingleItem.new(Name.new(0,"syscall2"), Syscall2.new, Types::BLOCK)
+      @properties.push(singleItem)
   end
   
   def addItem(name, value)
@@ -161,6 +166,31 @@ class Syscall
         code = PropertyList.new()
         code = se.visit(code)
       end
+      return code
+    else
+      return StringExpression.new("\"\"")
+    end
+  end
+  
+  def printList(depth)
+  end
+end
+
+class Syscall2
+  
+  def visit(propertyList)
+    #get StringPropertyList
+    item = propertyList.getItem($valueName)
+    if item != nil
+      #string = 'ruby ./'+item.value
+      string = item.value
+      string.gsub!(/\"/,'')
+      code = `#{string}`
+      code.tr!("\n",'')
+      code = "\"" + code + "\""
+      se = StringExpression.new(code)
+      code = PropertyList.new()
+      code = se.visit(code)
       return code
     else
       return StringExpression.new("\"\"")

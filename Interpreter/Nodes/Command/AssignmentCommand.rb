@@ -29,7 +29,9 @@ class AssignmentCommand
        i+=1
        print '  '  
     end
-    print @name.name + ' = '
+    if @name != nil
+      print @name.name + ' = '
+    end
     @expression.printList(depth)  
   end
 end

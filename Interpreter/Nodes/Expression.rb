@@ -82,12 +82,22 @@ class Expression
      #Only right part of the assignment is present
      if (@left == nil)      
        if evaluatedRight.is_a? Block or evaluatedRight.is_a? PropertyList
+           if evaluatedRight.is_a? Block
+               #we need to store parent of the block 
+               #otherwise recursive call of blocks would lead to false parent
+               evaluatedRight.parent = propertyList
+          end
           return evaluatedRight
        else
-         evaluatedRight = evaluatedRight.visit(propertyList)       
+         evaluatedRight = evaluatedRight.visit(propertyList)    
+         if evaluatedRight.is_a? Block
+             #we need to store parent of the block 
+             #otherwise recursive call of blocks would lead to false parent
+             evaluatedRight.parent = propertyList
+             return evaluatedRight
+         end
          return resolveReference(evaluatedRight)
        end
-       #TODO Handle the property reference somehow for the .syscall here
      end
      evaluatedLeft = @left.visit(propertyList)
      if evaluatedLeft.is_a? Block

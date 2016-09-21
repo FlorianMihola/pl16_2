@@ -1,1 +1,3 @@
-system 'ruby ./echo.rb hallo' 
+output = `echo (test 2 -le 1)`
+
+p output

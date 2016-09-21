@@ -5,7 +5,7 @@ require "PropertyList/PropertyList"
 
 class SyscallTest < Test::Unit::TestCase
   def test_syscall
-      contents = File.read('test12')
+      contents = File.read('test13')
       lexer = Lexer.new(contents)
       interpreter = Interpreter.new(lexer)
       createdBlock = interpreter.block()

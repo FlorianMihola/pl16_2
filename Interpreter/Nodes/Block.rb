@@ -3,8 +3,10 @@ require "PropertyList/PropertyList"
 
 class Block
   attr_accessor :commands
+  attr_accessor :parent 
   def initialize
     @commands ||= Array.new
+    @parent = nil
   end
   
   def visit(parent,arguments = nil)
@@ -12,7 +14,9 @@ class Block
     if arguments != nil
       propertyList.mergeWith(arguments)
     end
-    if (parent != nil)
+    if (@parent != nil)
+      propertyList.parent = @parent
+    else
       propertyList.parent = parent
     end
     @commands.each{ |x| 

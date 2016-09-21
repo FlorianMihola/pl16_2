@@ -22,7 +22,7 @@ class Interpreter
     
     if @currentToken.type == tokenType
       #debug
-      puts 'Token: ' + @currentToken.toString + "\n"
+      #puts 'Token: ' + @currentToken.toString + "\n"
       
       @currentToken =  @lexer.getNextToken
     else

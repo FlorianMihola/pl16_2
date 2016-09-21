@@ -1,0 +1,16 @@
+{
+	pas = {
+		[ n = "" : n = "0"; ]
+		[ k = "" : k = "0"; ]
+		[ k = "0" : ^ "1"; ]
+		[ k = n : ^ "1"; ]
+		nn = ("echo $((" + n + "-1))").syscall2;
+		nk = k;
+		nk2 = ("echo $((" + k + "-1))").syscall2;
+		pas1 = { n = *nn; k = *nk; } + *pas;
+		pas2 = { n = *nn; k = *nk2; } + *pas;
+		^  ("echo $((" + pas1 + "+" + pas2 + "))").syscall2;
+	};
+	result = {n = "10"; k = "5";} + pas;
+	("echo result = " + result).syscall;
+}
