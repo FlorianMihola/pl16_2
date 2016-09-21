@@ -1,0 +1,15 @@
+%finds the max out of 3 numbers using recursion (uselessly complex just to show off it works :-) )
+{
+    max = {  % number a, number b, number c -> number or "error"
+        ab = {} + ("if " + a + " geq " + b + " EXIT 1").syscall;
+        [  ab = "0" :
+            ac = {} + ("if " + a + " geq " + c + " EXIT 1").syscall;
+	    [ ac = "0" : ^a; ]
+            [ ac = "1" : ^c; ]
+        ][ ab = "1" :
+            ^ { a = *b; b = *a; c = *c; } + *max;
+        ]
+        ^ "error";
+    };
+    result = { a = "113"; b = "111"; c = "112"; } + max;
+}
